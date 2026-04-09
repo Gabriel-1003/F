@@ -12,106 +12,210 @@
         }
 
         body {
-            background: linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%);
+            background: linear-gradient(135deg, #ffeef8 0%, #ffd6e7 50%, #ffb3d9 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Georgia', serif;
-        }
-
-        .card {
-            background: white;
-            padding: 60px 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.3);
-            text-align: center;
-            max-width: 600px;
-            position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
-        .card::before {
-            content: '🌸';
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 40px;
-        }
-
-        .card::after {
-            content: '🌺';
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 40px;
-        }
-
-        h1 {
-            color: #ff69b4;
-            font-size: 3em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        .click-hint {
+            text-align: center;
             animation: pulse 2s infinite;
         }
 
-        .hearts {
+        .click-hint h2 {
+            color: #ff69b4;
             font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .click-hint .hand {
+            font-size: 4em;
+            animation: bounce 1s infinite;
+        }
+
+        .message-container {
+            display: none;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .message-container.show {
+            display: block;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .message-container h1 {
+            color: #ff1493;
+            font-size: 4.5em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            animation: slideDown 1s ease-out;
+        }
+
+        .hearts-container {
+            font-size: 3em;
             margin: 20px 0;
             animation: float 3s ease-in-out infinite;
         }
 
-        .message {
-            color: #ff1493;
-            font-size: 1.3em;
-            line-height: 1.6;
-            margin: 30px 0;
-            font-style: italic;
-        }
-
         .flowers {
-            font-size: 3em;
+            font-size: 4em;
             margin: 20px 0;
         }
 
+        .love-message {
+            color: #ff69b4;
+            font-size: 1.8em;
+            font-style: italic;
+            margin-top: 30px;
+            line-height: 1.6;
+            animation: fadeIn 2s ease-in;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 2em;
+            pointer-events: none;
+            animation: fall linear;
+        }
+
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
         }
 
-        .btn {
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .restart {
+            margin-top: 40px;
+            padding: 15px 40px;
             background: linear-gradient(135deg, #ff69b4, #ff1493);
             color: white;
-            padding: 15px 40px;
             border: none;
             border-radius: 30px;
-            font-size: 1.1em;
+            font-size: 1.2em;
             cursor: pointer;
-            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
             transition: transform 0.3s;
         }
 
-        .btn:hover {
+        .restart:hover {
             transform: scale(1.1);
         }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="click-hint" id="clickHint">
+        <div class="hand">👆</div>
+        <h2>Clique em qualquer lugar da tela!</h2>
+        <p style="color: #ff69b4; font-size: 1.2em;">✨ Uma surpresa especial te espera ✨</p>
+    </div>
+
+    <div class="message-container" id="messageContainer">
         <div class="flowers">🌹 🌸 🌺 💐 🌷</div>
         <h1>Feliz Dia das Mães</h1>
-        <div class="hearts">💖 💕 💗  💖</div>
-        <p class="message">
+        <div class="hearts-container">💖 💕 💗 💖 💕 💗</div>
+        <p class="love-message">
             "Mãe, você é o amor mais puro e verdadeiro.<br>
-            Obrigado por tudo que você faz por mim.<br>
+            Obrigado por todo carinho e dedicação.<br>
             Te amo infinitamente! 💝"
         </p>
-        <button class="btn" onclick="alert('Te amo, mãe! 💕')">Clique aqui</button>
+        <button class="restart" onclick="restart(event)">Clique novamente ❤️</button>
     </div>
+
+    <script>
+        let clicked = false;
+
+        document.body.addEventListener('click', function(e) {
+            if (e.target.classList.contains('restart')) return;
+            
+            if (!clicked) {
+                showMessage();
+            }
+            createHeart(e.clientX, e.clientY);
+        });
+
+        function showMessage() {
+            clicked = true;
+            document.getElementById('clickHint').style.display = 'none';
+            document.getElementById('messageContainer').classList.add('show');
+            
+            // Criar corações caindo
+            setInterval(() => {
+                const x = Math.random() * window.innerWidth;
+                createHeart(x, -50);
+            }, 300);
+        }
+
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = ['💖', '💕', '💗', '💝', '🌸', '🌹'][Math.floor(Math.random() * 6)];
+            heart.style.left = x + 'px';
+            heart.style.top = y + 'px';
+            heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            document.body.appendChild(heart);
+            
+            setTimeout(() => heart.remove(), 4000);
+        }
+
+        function restart(e) {
+            e.stopPropagation();
+            clicked = false;
+            document.getElementById('messageContainer').classList.remove('show');
+            document.getElementById('clickHint').style.display = 'block';
+            
+            // Remover todos os corações
+            document.querySelectorAll('.heart').forEach(h => h.remove());
+        }
+
+        // Suporte para touch em dispositivos móveis
+        document.body.addEventListener('touchstart', function(e) {
+            if (e.target.classList.contains('restart')) return;
+            
+            const touch = e.touches[0];
+            if (!clicked) {
+                showMessage();
+            }
+            createHeart(touch.clientX, touch.clientY);
+        });
+    </script>
 </body>
 </html>
