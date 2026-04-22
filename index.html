@@ -84,6 +84,42 @@
             animation: fall linear;
         }
 
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 7px 20px rgba(255, 20, 147, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-speaker {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.05); opacity: 0.8; }
@@ -122,21 +158,17 @@
             }
         }
 
-        .restart {
-            margin-top: 40px;
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #ff69b4, #ff1493);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 1.2em;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
-            transition: transform 0.3s;
+        .speaking {
+            animation: glow 1s ease-in-out infinite;
         }
 
-        .restart:hover {
-            transform: scale(1.1);
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 20, 147, 0.8); }
+            50% { box-shadow: 0 0 40px rgba(255, 20, 147, 1); }
+        }
+
+        .volume-icon {
+            font-size: 1.3em;
         }
     </style>
 </head>
@@ -148,22 +180,36 @@
     </div>
 
     <div class="message-container" id="messageContainer">
-        <div class="flowers">🌹 🌸 🌺 💐 🌷</div>
+        <div class="flowers">🌹 🌸 🌺  🌷</div>
         <h1>Feliz Dia das Mães</h1>
         <div class="hearts-container">💖 💕 💗 💖 💕 💗</div>
-        <p class="love-message">
+        <p class="love-message" id="loveMessage">
             "Mãe, você é o amor mais puro e verdadeiro.<br>
             Obrigado por todo carinho e dedicação.<br>
             Te amo infinitamente! 💝"
         </p>
-        <button class="restart" onclick="restart(event)">Clique novamente ❤️</button>
+        <div class="controls">
+            <button class="btn btn-speaker" id="speakBtn" onclick="speakMessage(event)">
+                <span class="volume-icon">🔊</span>
+                <span>Ouvir mensagem</span>
+            </button>
+            <button class="btn" onclick="restart(event)">
+                <span>❤️</span>
+                <span>Clique novamente</span>
+            </button>
+        </div>
     </div>
 
     <script>
         let clicked = false;
+        let isSpeaking = false;
+        const synth = window.speechSynthesis;
+
+        // Texto que será falado
+        const messageText = "Feliz Dia das Mães! Mãe, você é o amor mais puro e verdadeiro. Obrigado por todo carinho e dedicação. Te amo infinitamente!";
 
         document.body.addEventListener('click', function(e) {
-            if (e.target.classList.contains('restart')) return;
+            if (e.target.classList.contains('btn') || e.target.closest('.btn')) return;
             
             if (!clicked) {
                 showMessage();
@@ -176,11 +222,70 @@
             document.getElementById('clickHint').style.display = 'none';
             document.getElementById('messageContainer').classList.add('show');
             
+            // Falar a mensagem automaticamente após 1 segundo
+            setTimeout(() => {
+                speakMessage();
+            }, 1000);
+            
             // Criar corações caindo
             setInterval(() => {
                 const x = Math.random() * window.innerWidth;
                 createHeart(x, -50);
             }, 300);
+        }
+
+        function speakMessage(event) {
+            if (event) event.stopPropagation();
+            
+            // Cancelar qualquer fala anterior
+            if (synth.speaking) {
+                synth.cancel();
+            }
+
+            // Verificar se o navegador suporta
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(messageText);
+                
+                // Configurar voz em português
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9; // Velocidade um pouco mais lenta
+                utterance.pitch = 1.1; // Tom um pouco mais alto (mais carinhoso)
+                utterance.volume = 1;
+
+                // Tentar encontrar uma voz em português
+                const voices = synth.getVoices();
+                const portugueseVoice = voices.find(voice => voice.lang.includes('pt-BR') || voice.lang.includes('pt'));
+                if (portugueseVoice) {
+                    utterance.voice = portugueseVoice;
+                }
+
+                // Eventos
+                utterance.onstart = function() {
+                    isSpeaking = true;
+                    document.getElementById('speakBtn').classList.add('speaking');
+                    document.querySelector('#speakBtn .volume-icon').textContent = '🔊';
+                    document.querySelector('#speakBtn span:last-child').textContent = 'Ouvindo...';
+                };
+
+                utterance.onend = function() {
+                    isSpeaking = false;
+                    document.getElementById('speakBtn').classList.remove('speaking');
+                    document.querySelector('#speakBtn .volume-icon').textContent = '🔊';
+                    document.querySelector('#speakBtn span:last-child').textContent = 'Ouvir mensagem';
+                };
+
+                utterance.onerror = function(event) {
+                    console.error('Erro na síntese de voz:', event);
+                    isSpeaking = false;
+                    document.getElementById('speakBtn').classList.remove('speaking');
+                    document.querySelector('#speakBtn span:last-child').textContent = 'Ouvir mensagem';
+                };
+
+                // Falar
+                synth.speak(utterance);
+            } else {
+                alert('Desculpe, seu navegador não suporta síntese de voz.');
+            }
         }
 
         function createHeart(x, y) {
@@ -197,10 +302,20 @@
         }
 
         function restart(e) {
-            e.stopPropagation();
+            if (e) e.stopPropagation();
+            
+            // Parar áudio se estiver tocando
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
             clicked = false;
+            isSpeaking = false;
             document.getElementById('messageContainer').classList.remove('show');
             document.getElementById('clickHint').style.display = 'block';
+            document.getElementById('speakBtn').classList.remove('speaking');
+            document.querySelector('#speakBtn .volume-icon').textContent = '🔊';
+            document.querySelector('#speakBtn span:last-child').textContent = 'Ouvir mensagem';
             
             // Remover todos os corações
             document.querySelectorAll('.heart').forEach(h => h.remove());
@@ -208,7 +323,7 @@
 
         // Suporte para touch em dispositivos móveis
         document.body.addEventListener('touchstart', function(e) {
-            if (e.target.classList.contains('restart')) return;
+            if (e.target.classList.contains('btn') || e.target.closest('.btn')) return;
             
             const touch = e.touches[0];
             if (!clicked) {
@@ -216,6 +331,13 @@
             }
             createHeart(touch.clientX, touch.clientY);
         });
+
+        // Carregar vozes disponíveis
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = function() {
+                window.speechSynthesis.getVoices();
+            };
+        }
     </script>
 </body>
 </html>
