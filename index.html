@@ -84,48 +84,44 @@
             animation: fall linear;
         }
 
-        .controls {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #ff69b4, #ff1493);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 1.1em;
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 3px solid #ff69b4;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.8em;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
-            transition: all 0.3s;
-            display: flex;
+            display: none;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+            transition: all 0.3s;
+            z-index: 100;
+            animation: rotate 3s linear infinite;
         }
 
-        .btn:hover {
+        .music-control.show {
+            display: flex;
+        }
+
+        .music-control.paused {
+            animation-play-state: paused;
+            opacity: 0.6;
+        }
+
+        .music-control:hover {
             transform: scale(1.1);
-            box-shadow: 0 7px 20px rgba(255, 20, 147, 0.6);
+            background: #ff69b4;
+            color: white;
         }
 
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-speaker {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        .btn-music {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-        }
-
-        .btn-volume {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         @keyframes pulse {
@@ -166,322 +162,108 @@
             }
         }
 
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 20, 147, 0.8); }
-            50% { box-shadow: 0 0 40px rgba(255, 20, 147, 1); }
-        }
-
-        @keyframes musicWave {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        .speaking, .playing {
-            animation: glow 1s ease-in-out infinite;
-        }
-
-        .music-note {
-            position: absolute;
-            font-size: 2em;
-            pointer-events: none;
-            animation: musicFloat 3s ease-in-out infinite;
-            opacity: 0.7;
-        }
-
-        @keyframes musicFloat {
-            0%, 100% { 
-                transform: translateY(0) rotate(0deg);
-                opacity: 0.7;
-            }
-            50% { 
-                transform: translateY(-30px) rotate(20deg);
-                opacity: 1;
-            }
-        }
-
-        .volume-slider {
-            display: none;
-            position: absolute;
-            bottom: 80px;
-            background: white;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            z-index: 100;
-        }
-
-        .volume-slider.show {
-            display: block;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { 
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .volume-slider input {
-            width: 150px;
-            margin: 10px 0;
-        }
-
-        .volume-label {
-            color: #ff69b4;
-            font-weight: bold;
-        }
-
-        .music-visualizer {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            align-items: flex-end;
-            height: 30px;
-            margin: 10px 0;
-        }
-
-        .music-bar {
-            width: 8px;
+        .restart {
+            margin-top: 40px;
+            padding: 15px 40px;
             background: linear-gradient(135deg, #ff69b4, #ff1493);
-            border-radius: 5px;
-            animation: musicWave 0.5s ease-in-out infinite;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+            transition: transform 0.3s;
         }
 
-        .music-bar:nth-child(1) { animation-delay: 0s; height: 15px; }
-        .music-bar:nth-child(2) { animation-delay: 0.1s; height: 25px; }
-        .music-bar:nth-child(3) { animation-delay: 0.2s; height: 20px; }
-        .music-bar:nth-child(4) { animation-delay: 0.3s; height: 30px; }
-        .music-bar:nth-child(5) { animation-delay: 0.4s; height: 18px; }
+        .restart:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
-    <!-- Áudio de fundo -->
+    <!-- Elemento de áudio -->
     <audio id="backgroundMusic" loop>
-        <source src="https://www.bensound.com/free-music-for-youtube/bensound-love.mp3" type="audio/mp3">
-        Seu navegador não suporta áudio.
+        <!-- Substitua pelo seu arquivo de música -->
+        <source src="musica-dia-das-maes.mp3" type="audio/mpeg">
+        <!-- Músicas gratuitas que você pode usar: -->
+        <!-- Baixe de: https://www.bensound.com/ ou https://freemusicarchive.org/ -->
     </audio>
+
+    <button class="music-control" id="musicControl" onclick="toggleMusic(event)">🎵</button>
 
     <div class="click-hint" id="clickHint">
         <div class="hand">👆</div>
         <h2>Clique em qualquer lugar da tela!</h2>
         <p style="color: #ff69b4; font-size: 1.2em;">✨ Uma surpresa especial te espera ✨</p>
+        <p style="color: #ff69b4; margin-top: 10px; font-size: 0.9em;">🎵 Com música especial 🎵</p>
     </div>
 
     <div class="message-container" id="messageContainer">
         <div class="flowers">🌹 🌸 🌺 💐 🌷</div>
         <h1>Feliz Dia das Mães</h1>
-        <div class="hearts-container">💖  💗 💖 💕 💗</div>
-        <p class="love-message" id="loveMessage">
+        <div class="hearts-container">💖 💕 💗 💖 💕 💗</div>
+        <p class="love-message">
             "Mãe, você é o amor mais puro e verdadeiro.<br>
             Obrigado por todo carinho e dedicação.<br>
             Te amo infinitamente! 💝"
         </p>
-        
-        <div class="music-visualizer" id="musicVisualizer" style="display: none;">
-            <div class="music-bar"></div>
-            <div class="music-bar"></div>
-            <div class="music-bar"></div>
-            <div class="music-bar"></div>
-            <div class="music-bar"></div>
-        </div>
-
-        <div class="controls">
-            <button class="btn btn-speaker" id="speakBtn" onclick="speakMessage(event)">
-                <span class="volume-icon">🔊</span>
-                <span>Ouvir mensagem</span>
-            </button>
-            <button class="btn btn-music" id="musicBtn" onclick="toggleMusic(event)">
-                <span class="music-icon"></span>
-                <span>Música: ON</span>
-            </button>
-            <button class="btn btn-volume" onclick="toggleVolumeSlider(event)">
-                <span>🔈</span>
-                <span>Volume</span>
-            </button>
-            <button class="btn" onclick="restart(event)">
-                <span>❤️</span>
-                <span>Clique novamente</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Slider de volume -->
-    <div class="volume-slider" id="volumeSlider">
-        <div class="volume-label">Volume da Música</div>
-        <input type="range" id="volumeControl" min="0" max="100" value="50" oninput="changeVolume(this.value)">
-        <div style="display: flex; justify-content: space-between; color: #ff69b4; font-size: 0.9em;">
-            <span></span>
-            <span>🔊</span>
-        </div>
+        <button class="restart" onclick="restart(event)">Clique novamente ❤️</button>
     </div>
 
     <script>
         let clicked = false;
-        let isSpeaking = false;
-        let isMusicPlaying = false;
-        const synth = window.speechSynthesis;
+        let musicPlaying = false;
         const music = document.getElementById('backgroundMusic');
-        const musicBtn = document.getElementById('musicBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const musicVisualizer = document.getElementById('musicVisualizer');
+        const musicControl = document.getElementById('musicControl');
 
-        // Texto que será falado
-        const messageText = "Feliz Dia das Mães! Mãe, você é o amor mais puro e verdadeiro. Obrigado por todo carinho e dedicação. Te amo infinitamente!";
-
-        // Notas musicais para animação
-        const musicNotes = ['🎵', '🎶', '♪', '♫', '🎼'];
+        // Ajuste o volume (0.0 a 1.0)
+        music.volume = 0.5;
 
         document.body.addEventListener('click', function(e) {
-            if (e.target.classList.contains('btn') || e.target.closest('.btn') || e.target.closest('.volume-slider')) return;
+            if (e.target.classList.contains('restart') || e.target.classList.contains('music-control')) return;
             
             if (!clicked) {
                 showMessage();
+                // Toca a música no primeiro clique (necessário para browsers)
+                playMusic();
             }
             createHeart(e.clientX, e.clientY);
         });
+
+        function playMusic() {
+            music.play().then(() => {
+                musicPlaying = true;
+                musicControl.classList.add('show');
+            }).catch(error => {
+                console.log('Autoplay prevenido pelo navegador. Usuário precisa interagir primeiro.');
+            });
+        }
+
+        function toggleMusic(e) {
+            e.stopPropagation();
+            if (musicPlaying) {
+                music.pause();
+                musicControl.classList.add('paused');
+                musicControl.innerHTML = '🔇';
+            } else {
+                music.play();
+                musicControl.classList.remove('paused');
+                musicControl.innerHTML = '🎵';
+            }
+            musicPlaying = !musicPlaying;
+        }
 
         function showMessage() {
             clicked = true;
             document.getElementById('clickHint').style.display = 'none';
             document.getElementById('messageContainer').classList.add('show');
-            
-            // Iniciar música
-            playMusic();
-            
-            // Falar a mensagem automaticamente após 2 segundos
-            setTimeout(() => {
-                speakMessage();
-            }, 2000);
+            musicControl.classList.add('show');
             
             // Criar corações caindo
             setInterval(() => {
                 const x = Math.random() * window.innerWidth;
                 createHeart(x, -50);
             }, 300);
-
-            // Criar notas musicais
-            setInterval(() => {
-                if (isMusicPlaying) {
-                    createMusicNote();
-                }
-            }, 1000);
-        }
-
-        function playMusic() {
-            music.volume = 0.5; // Volume inicial 50%
-            music.play().then(() => {
-                isMusicPlaying = true;
-                updateMusicButton();
-                musicVisualizer.style.display = 'flex';
-            }).catch(error => {
-                console.log('Autoplay bloqueado, usuário precisa interagir primeiro');
-                isMusicPlaying = false;
-                updateMusicButton();
-            });
-        }
-
-        function toggleMusic(event) {
-            if (event) event.stopPropagation();
-            
-            if (isMusicPlaying) {
-                music.pause();
-                isMusicPlaying = false;
-                musicVisualizer.style.display = 'none';
-            } else {
-                music.play();
-                isMusicPlaying = true;
-                musicVisualizer.style.display = 'flex';
-            }
-            updateMusicButton();
-        }
-
-        function updateMusicButton() {
-            if (isMusicPlaying) {
-                musicBtn.classList.add('playing');
-                musicBtn.querySelector('.music-icon').textContent = '🎵';
-                musicBtn.querySelector('span:last-child').textContent = 'Música: ON';
-            } else {
-                musicBtn.classList.remove('playing');
-                musicBtn.querySelector('.music-icon').textContent = '🔇';
-                musicBtn.querySelector('span:last-child').textContent = 'Música: OFF';
-            }
-        }
-
-        function toggleVolumeSlider(event) {
-            if (event) event.stopPropagation();
-            volumeSlider.classList.toggle('show');
-        }
-
-        function changeVolume(value) {
-            music.volume = value / 100;
-        }
-
-        function speakMessage(event) {
-            if (event) event.stopPropagation();
-            
-            // Reduzir volume da música durante a fala
-            if (isMusicPlaying) {
-                music.volume = 0.2;
-            }
-            
-            // Cancelar qualquer fala anterior
-            if (synth.speaking) {
-                synth.cancel();
-            }
-
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(messageText);
-                
-                utterance.lang = 'pt-BR';
-                utterance.rate = 0.9;
-                utterance.pitch = 1.1;
-                utterance.volume = 1;
-
-                const voices = synth.getVoices();
-                const portugueseVoice = voices.find(voice => voice.lang.includes('pt-BR') || voice.lang.includes('pt'));
-                if (portugueseVoice) {
-                    utterance.voice = portugueseVoice;
-                }
-
-                utterance.onstart = function() {
-                    isSpeaking = true;
-                    document.getElementById('speakBtn').classList.add('speaking');
-                    document.querySelector('#speakBtn .volume-icon').textContent = '';
-                    document.querySelector('#speakBtn span:last-child').textContent = 'Ouvindo...';
-                };
-
-                utterance.onend = function() {
-                    isSpeaking = false;
-                    document.getElementById('speakBtn').classList.remove('speaking');
-                    document.querySelector('#speakBtn .volume-icon').textContent = '🔊';
-                    document.querySelector('#speakBtn span:last-child').textContent = 'Ouvir mensagem';
-                    
-                    // Restaurar volume da música
-                    if (isMusicPlaying) {
-                        music.volume = document.getElementById('volumeControl').value / 100;
-                    }
-                };
-
-                utterance.onerror = function(event) {
-                    console.error('Erro na síntese de voz:', event);
-                    isSpeaking = false;
-                    document.getElementById('speakBtn').classList.remove('speaking');
-                    document.querySelector('#speakBtn span:last-child').textContent = 'Ouvir mensagem';
-                    
-                    if (isMusicPlaying) {
-                        music.volume = document.getElementById('volumeControl').value / 100;
-                    }
-                };
-
-                synth.speak(utterance);
-            } else {
-                alert('Desculpe, seu navegador não suporta síntese de voz.');
-            }
         }
 
         function createHeart(x, y) {
@@ -497,67 +279,34 @@
             setTimeout(() => heart.remove(), 4000);
         }
 
-        function createMusicNote() {
-            const note = document.createElement('div');
-            note.className = 'music-note';
-            note.innerHTML = musicNotes[Math.floor(Math.random() * musicNotes.length)];
-            note.style.left = (Math.random() * window.innerWidth) + 'px';
-            note.style.top = (Math.random() * window.innerHeight) + 'px';
-            note.style.fontSize = (Math.random() * 20 + 20) + 'px';
-            document.body.appendChild(note);
-            
-            setTimeout(() => note.remove(), 3000);
-        }
-
         function restart(e) {
-            if (e) e.stopPropagation();
-            
-            if (synth.speaking) {
-                synth.cancel();
-            }
-            
+            e.stopPropagation();
             clicked = false;
-            isSpeaking = false;
             document.getElementById('messageContainer').classList.remove('show');
             document.getElementById('clickHint').style.display = 'block';
-            document.getElementById('speakBtn').classList.remove('speaking');
-            document.querySelector('#speakBtn .volume-icon').textContent = '🔊';
-            document.querySelector('#speakBtn span:last-child').textContent = 'Ouvir mensagem';
-            volumeSlider.classList.remove('show');
-            musicVisualizer.style.display = 'none';
+            musicControl.classList.remove('show');
             
+            // Parar música
+            if (musicPlaying) {
+                music.pause();
+                music.currentTime = 0;
+                musicPlaying = false;
+            }
+            
+            // Remover todos os corações
             document.querySelectorAll('.heart').forEach(h => h.remove());
-            document.querySelectorAll('.music-note').forEach(n => n.remove());
         }
 
-        // Fechar slider de volume ao clicar fora
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.volume-slider') && !e.target.closest('.btn-volume')) {
-                volumeSlider.classList.remove('show');
-            }
-        });
-
-        // Suporte para touch
+        // Suporte para touch em dispositivos móveis
         document.body.addEventListener('touchstart', function(e) {
-            if (e.target.classList.contains('btn') || e.target.closest('.btn') || e.target.closest('.volume-slider')) return;
+            if (e.target.classList.contains('restart') || e.target.classList.contains('music-control')) return;
             
             const touch = e.touches[0];
             if (!clicked) {
                 showMessage();
+                playMusic();
             }
             createHeart(touch.clientX, touch.clientY);
-        });
-
-        // Carregar vozes
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = function() {
-                window.speechSynthesis.getVoices();
-            };
-        }
-
-        // Fechar slider ao mudar volume
-        document.getElementById('volumeControl').addEventListener('change', function() {
-            setTimeout(() => volumeSlider.classList.remove('show'), 1000);
         });
     </script>
 </body>
